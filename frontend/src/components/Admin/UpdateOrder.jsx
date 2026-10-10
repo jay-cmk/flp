@@ -52,7 +52,7 @@ const UpdateOrder = () => {
 
             {loading ? <Loading /> : (
                 <>
-                    {order && order.user && order.shippingInfo && (
+                    {order && order.shippingInfo && (
                         <div className="flex flex-col gap-4">
                             <Link to="/admin/orders" className="ml-1 flex items-center gap-0 font-medium text-primary-blue uppercase"><ArrowBackIosIcon sx={{ fontSize: "18px" }} />Go Back</Link>
 
@@ -60,11 +60,11 @@ const UpdateOrder = () => {
                                 <div className="sm:w-1/2 border-r">
                                     <div className="flex flex-col gap-3 my-8 mx-10">
                                         <h3 className="font-medium text-lg">Delivery Address</h3>
-                                        <h4 className="font-medium">{order.user.name}</h4>
+                                        <h4 className="font-medium">{order.shippingInfo.name || order.user?.name || 'Guest customer'}</h4>
                                         <p className="text-sm">{`${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state} - ${order.shippingInfo.pincode}`}</p>
                                         <div className="flex gap-2 text-sm">
                                             <p className="font-medium">Email</p>
-                                            <p>{order.user.email}</p>
+                                            <p>{order.shippingInfo.email || order.user?.email || 'Not provided'}</p>
                                         </div>
                                         <div className="flex gap-2 text-sm">
                                             <p className="font-medium">Phone Number</p>
@@ -73,11 +73,13 @@ const UpdateOrder = () => {
                                     </div>
                                 </div>
 
+                                {order.paymentInfo?.status === 'PAID' ? (
                                 <form onSubmit={updateOrderSubmitHandler} className="flex flex-col gap-3 p-8">
                                     <h3 className="font-medium text-lg">Update Status</h3>
                                     <div className="flex gap-2">
                                         <p className="text-sm font-medium">Current Status:</p>
                                         <p className="text-sm">
+                                            {order.orderStatus === "Pending Payment" && "Pending payment verification"}
                                             {order.orderStatus === "Shipped" && (`Shipped on ${formatDate(order.shippedAt)}`)}
                                             {order.orderStatus === "Processing" && (`Ordered on ${formatDate(order.createdAt)}`)}
                                             {order.orderStatus === "Delivered" && (`Delivered on ${formatDate(order.deliveredAt)}`)}
@@ -101,6 +103,11 @@ const UpdateOrder = () => {
                                         Update
                                     </button>
                                 </form>
+                                ) : (
+                                    <div className="p-8 text-sm text-amber-800" role="status">
+                                        Payment is {order.paymentInfo?.status || 'PENDING_PAYMENT'}. Fulfillment is disabled until payment is verified by a configured payment provider.
+                                    </div>
+                                )}
                             </div>
 
                             {order.orderItems && order.orderItems.map((item) => {

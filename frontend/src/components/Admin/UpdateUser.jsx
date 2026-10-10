@@ -52,7 +52,7 @@ const UpdateUser = () => {
             setEmail(user.email);
             setGender(user.gender);
             setRole(user.role);
-            setAvatarPreview(user.avatar.url);
+            setAvatarPreview(user?.avatar?.url);
         }
         if (error) {
             enqueueSnackbar(error, { variant: "error" });

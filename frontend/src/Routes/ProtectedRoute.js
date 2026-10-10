@@ -1,17 +1,21 @@
-import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+﻿import { useSelector } from 'react-redux';
+import { Navigate, useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children, isAdmin }) => {
-
     const { loading, isAuthenticated, user } = useSelector(state => state.user);
+    const location = useLocation();
 
-    return (
-        <>
-            {loading === false && (
-                isAuthenticated === false ? <Navigate to="/login" /> : isAdmin ? user.role !== "admin" ? <Navigate to="/login" /> : children : children
-            )}
-        </>
-    );
+    if (loading !== false) {
+        return null;
+    }
+
+    if (isAdmin) {
+        return isAuthenticated && user?.role === 'admin'
+            ? children
+            : <Navigate to="/admin/login" replace state={{ from: location }} />;
+    }
+
+    return children;
 };
 
 export default ProtectedRoute;

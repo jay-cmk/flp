@@ -5,6 +5,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import GroupIcon from '@mui/icons-material/Group';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import CloseIcon from '@mui/icons-material/Close';
@@ -46,6 +47,11 @@ const navMenu = [
         ref: "/admin/reviews",
     },
     {
+        icon: <QrCode2Icon />,
+        label: "Payment QR",
+        ref: "/admin/payment-qr",
+    },
+    {
         icon: <AccountBoxIcon />,
         label: "My Profile",
         ref: "/account",
@@ -75,7 +81,7 @@ const Sidebar = ({ activeTab, setToggleSidebar }) => {
             <div className="flex items-center gap-3 bg-gray-700 p-2 rounded-lg shadow-lg my-4 mx-3.5">
                 <Avatar
                     alt="Avatar"
-                    src={user.avatar.url}
+                    src={user?.avatar?.url}
                 />
                 <div className="flex flex-col gap-0">
                     <span className="font-medium text-lg">{user.name}</span>

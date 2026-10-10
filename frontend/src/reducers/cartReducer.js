@@ -1,16 +1,21 @@
-import { ADD_TO_CART, EMPTY_CART, REMOVE_FROM_CART, SAVE_SHIPPING_INFO } from "../constants/cartConstants";
+import { ADD_TO_CART, EMPTY_CART, REMOVE_FROM_CART, SAVE_SHIPPING_INFO, UPDATE_CART_ITEM_QUANTITY } from "../constants/cartConstants";
+
+const getCartLineKey = (item) => {
+    if (!item || typeof item !== 'object') return `${item}:null`;
+    return `${item.product}:${JSON.stringify(item.variant ?? null)}`;
+};
 
 export const cartReducer = (state = { cartItems: [], shippingInfo: {} }, { type, payload }) => {
     switch (type) {
         case ADD_TO_CART:
             const item = payload;
-            const isItemExist = state.cartItems.find((el) => el.product === item.product);
+            const isItemExist = state.cartItems.find((el) => getCartLineKey(el) === getCartLineKey(item));
 
             if (isItemExist) {
                 return {
                     ...state,
                     cartItems: state.cartItems.map((el) =>
-                        el.product === isItemExist.product ? item : el
+                        getCartLineKey(el) === getCartLineKey(isItemExist) ? item : el
                     ),
                 }
             } else {
@@ -22,7 +27,16 @@ export const cartReducer = (state = { cartItems: [], shippingInfo: {} }, { type,
         case REMOVE_FROM_CART:
             return {
                 ...state,
-                cartItems: state.cartItems.filter((el) => el.product !== payload)
+                cartItems: state.cartItems.filter((el) => getCartLineKey(el) !== getCartLineKey(payload))
+            }
+        case UPDATE_CART_ITEM_QUANTITY:
+            return {
+                ...state,
+                cartItems: state.cartItems.map((el) =>
+                    getCartLineKey(el) === getCartLineKey(payload)
+                        ? { ...el, quantity: payload.quantity }
+                        : el
+                )
             }
         case EMPTY_CART:
             return {

@@ -1,29 +1,30 @@
 import { useSelector } from 'react-redux';
 import CheckIcon from '@mui/icons-material/Check';
 
-const Stepper = ({ activeStep, children }) => {
+const Stepper = ({ activeStep, children, hideDeliveryAddress = false, items }) => {
 
     const { user } = useSelector((state) => state.user);
     const { shippingInfo, cartItems } = useSelector((state) => state.cart);
+    const checkoutItems = items || cartItems;
 
-    const address = `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} - ${shippingInfo.pincode}`;
+    const address = shippingInfo ? `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} - ${shippingInfo.pincode}` : 'Delivery address pending';
 
     const steps = [
         {
-            label: "LOGIN",
-            desc: <p className="font-medium text-sm">{user.name} <span className="text-sm font-normal">{user.email}</span></p>
+            label: 'GUEST CHECKOUT',
+            desc: <p className="font-medium text-sm">{user?.name ? user.name : 'Guest order'} <span className="text-sm font-normal">{user?.email ? user.email : 'No account required'}</span></p>
         },
         {
-            label: "DELIVERY ADDRESS",
-            desc: <p className="font-medium text-sm">{user.name} <span className="text-sm font-normal">{address}</span></p>
+            label: 'DELIVERY ADDRESS',
+            desc: hideDeliveryAddress ? null : <p className="font-medium text-sm">{shippingInfo?.name ? shippingInfo.name : 'Guest'} <span className="text-sm font-normal">{address}</span></p>
         },
         {
-            label: "ORDER SUMMARY",
-            desc: <p className="font-medium text-sm">{cartItems.length} Item</p>
+            label: 'ORDER SUMMARY',
+            desc: <p className="font-medium text-sm">{checkoutItems.reduce((count, item) => count + Number(item.quantity || 0), 0)} Items</p>
         },
         {
-            label: "PAYMENT OPTIONS",
-            desc: <p className="font-medium text-sm">Paytm</p>
+            label: 'PAYMENT',
+            desc: <p className="font-medium text-sm">PhonePe / Google Pay</p>
         }
     ]
 

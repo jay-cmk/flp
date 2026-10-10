@@ -8,10 +8,16 @@ const Dashboard = ({ activeTab, children }) => {
     const [toggleSidebar, setToggleSidebar] = useState(false);
 
     useEffect(() => {
-        if (window.innerWidth < 600) {
-            setOnMobile(true);
-        }
-    }, [])
+        const updateLayout = () => {
+            const mobile = window.innerWidth < 640;
+            setOnMobile(mobile);
+            if (!mobile) setToggleSidebar(false);
+        };
+
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
+        return () => window.removeEventListener('resize', updateLayout);
+    }, []);
 
     return (
         <>
@@ -20,9 +26,9 @@ const Dashboard = ({ activeTab, children }) => {
                 {!onMobile && <Sidebar activeTab={activeTab} />}
                 {toggleSidebar && <Sidebar activeTab={activeTab} setToggleSidebar={setToggleSidebar}/>}
 
-                <div className="w-full sm:w-4/5 sm:ml-72 min-h-screen">
-                    <div className="flex flex-col gap-6 sm:m-8 p-2 pb-6 overflow-hidden">
-                        <button onClick={() => setToggleSidebar(true)} className="sm:hidden bg-gray-700 w-10 h-10 rounded-full shadow text-white flex items-center justify-center"><MenuIcon /></button>
+                <div className="w-full min-w-0 sm:ml-[20%] sm:w-4/5 min-h-screen">
+                    <div className="flex min-w-0 flex-col gap-6 p-2 pb-6 sm:p-8">
+                        <button onClick={() => setToggleSidebar(true)} aria-expanded={toggleSidebar} className="sm:hidden bg-gray-700 w-10 h-10 rounded-full shadow text-white flex items-center justify-center"><MenuIcon /></button>
                         {children}
                     </div>
                 </div>

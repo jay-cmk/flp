@@ -4,7 +4,8 @@ import StarsIcon from '@mui/icons-material/Stars';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import HelpIcon from '@mui/icons-material/Help';
 import paymentMethods from '../../../assets/images/payment-methods.svg';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import storeInformation from '../../../utils/storeInformation';
 
 const footerLinks = [
   {
@@ -12,7 +13,7 @@ const footerLinks = [
     links: [
       {
         name: "Contact Us",
-        redirect: "https://www.flipkart.com/helpcentre",
+        redirect: "/contact",
       },
       {
         name: "About Us",
@@ -58,6 +59,10 @@ const footerLinks = [
       {
         name: "FAQ",
         redirect: "https://www.flipkart.com/helpcentre?catalog=55c9c8e2b0000023002c1702&view=CATALOG",
+      },
+      {
+        name: "Admin Login",
+        redirect: "/admin/login",
       }
     ]
   },
@@ -66,7 +71,7 @@ const footerLinks = [
     links: [
       {
         name: "Return Policy",
-        redirect: "https://www.flipkart.com/pages/returnpolicy",
+        redirect: "/return-policy",
       },
       {
         name: "Terms Of Use",
@@ -78,7 +83,7 @@ const footerLinks = [
       },
       {
         name: "Privacy",
-        redirect: "https://www.flipkart.com/pages/privacypolicy",
+        redirect: "/privacy-policy",
       },
       {
         name: "Sitemap",
@@ -122,14 +127,18 @@ const Footer = () => {
     <>
       {!adminRoute && (
         <>
-          <footer className="mt-20 w-full py-1 sm:py-4 px-4 sm:px-12 bg-primary-darkBlue text-white text-xs border-b border-gray-600 flex flex-col sm:flex-row overflow-hidden">
-            <div className="w-full sm:w-7/12 flex flex-col sm:flex-row">
+          <footer className="mt-20 w-full py-1 sm:py-4 px-4 sm:px-12 bg-primary-darkBlue text-white text-xs border-b border-gray-600 flex flex-col sm:flex-row">
+            <div className="grid w-full grid-cols-2 gap-4 sm:w-7/12 sm:grid-cols-4 sm:gap-2">
 
               {footerLinks.map((el, i) => (
-                <div className="w-full sm:w-1/5 flex flex-col gap-2 my-3 sm:my-6 ml-5" key={i}>
+                <div className="min-w-0 flex flex-col gap-2 my-3 sm:my-6" key={i}>
                   <h2 className="text-primary-grey mb-2 uppercase">{el.title}</h2>
                   {el.links.map((item, i) => (
-                    <a href={item.redirect} target="_blank" rel="noreferrer" className="hover:underline" key={i}>{item.name}</a>
+                    item.redirect.startsWith("/") ? (
+                      <Link to={item.redirect} className="hover:underline" key={i}>{item.name}</Link>
+                    ) : (
+                      <a href={item.redirect} target="_blank" rel="noreferrer" className="hover:underline" key={i}>{item.name}</a>
+                    )
                   ))}
 
                 </div>
@@ -138,28 +147,21 @@ const Footer = () => {
             </div>
 
             <div className="border-gray-600 h-36 w-1 border-l mr-5 mt-6 hidden sm:block"></div>
-            <div className="w-full sm:w-5/12 my-6 mx-5 sm:mx-0 flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between">
+            <div className="w-full sm:w-5/12 my-6 sm:mx-0 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between">
               <div className="w-full sm:w-1/2">
                 <h2 className="text-primary-grey">Mail Us:</h2>
-                <p className="mt-2 leading-5">Flipkart Internet Private Limited,<br />
-                  Buildings Alyssa, Begonia &<br />
-                  Clove Embassy Tech Village,<br />
-                  Outer Ring Road, Devarabeesanahalli Village,<br />
-                  Bengaluru, 560103,<br />
-                  Karnataka, India
+                <p className="mt-2 leading-5">
+                  {storeInformation.legalName},<br />
+                  {storeInformation.address.map((line) => <span key={line}>{line}<br /></span>)}
                 </p>
               </div>
 
               <div className="w-full sm:w-1/2">
                 <h2 className="text-primary-grey">Registered Office Address:</h2>
-                <p className="mt-2 leading-5">Flipkart Internet Private Limited,<br />
-                  Buildings Alyssa, Begonia &<br />
-                  Clove Embassy Tech Village,<br />
-                  Outer Ring Road, Devarabeesanahalli Village,<br />
-                  Bengaluru, 560103,<br />
-                  Karnataka, India <br />
+                <p className="mt-2 leading-5">{storeInformation.legalName},<br />
+                  {storeInformation.address.map((line) => <span key={line}>{line}<br /></span>)}
                   CIN : U51109KA2012PTC066107<br />
-                  Telephone: <a className="text-primary-blue" href="tel:18002029898">1800 202 9898</a>
+                  Telephone: <a className="text-primary-blue" href={`tel:${storeInformation.phone.replace(/\s/g, '')}`}>{storeInformation.phone}</a>
                 </p>
               </div>
             </div>
@@ -167,7 +169,7 @@ const Footer = () => {
           </footer>
           {/* <!-- footer ends --> */}
 
-          <div className="px-16 py-6 w-full bg-primary-darkBlue hidden sm:flex justify-between items-center text-sm text-white">
+          <div className="px-4 sm:px-6 lg:px-16 py-6 w-full bg-primary-darkBlue hidden sm:flex flex-wrap gap-x-4 gap-y-4 justify-between items-center text-sm text-white">
             <a href="https://seller.flipkart.com/sell-online" target="_blank" rel="noreferrer" className="flex items-center gap-2">
               <span className="text-yellow-400"><WorkIcon sx={{ fontSize: "20px" }} /></span> Sell On Flipkart
             </a>

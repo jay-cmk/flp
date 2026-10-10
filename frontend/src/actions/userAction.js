@@ -69,6 +69,26 @@ export const loginUser = (email, password) => async (dispatch) => {
     }
 };
 
+// Admin Login
+export const adminLoginUser = (email, password) => async (dispatch) => {
+    const config = {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    };
+
+    const { data } = await axios.post(
+        '/api/v1/admin/login',
+        { email, password },
+        config
+    );
+
+    dispatch({
+        type: LOGIN_USER_SUCCESS,
+        payload: data.user,
+    });
+};
+
 // Register User
 export const registerUser = (userData) => async (dispatch) => {
     try {

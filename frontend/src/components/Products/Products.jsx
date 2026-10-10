@@ -188,7 +188,7 @@ const Products = () => {
                         {loading ? <Loader /> : (
                             <div className="flex flex-col gap-2 pb-4 justify-center items-center w-full overflow-hidden bg-white">
 
-                                <div className="grid grid-cols-1 sm:grid-cols-4 w-full place-content-start overflow-hidden pb-4 border-b">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full place-content-start overflow-hidden pb-4 border-b">
                                     {products?.map((product) => (
                                             <Product {...product} key={product._id} />
                                         ))

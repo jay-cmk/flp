@@ -2,7 +2,6 @@ const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const sendToken = require('../utils/sendToken');
 const ErrorHandler = require('../utils/errorHandler');
-const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary');
 
@@ -54,11 +53,34 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
     sendToken(user, 201, res);
 });
 
+// Admin Login
+exports.loginAdmin = asyncErrorHandler(async (req, res, next) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return next(new ErrorHandler("Please Enter Email And Password", 400));
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user || !(await user.comparePassword(password))) {
+        return next(new ErrorHandler("Invalid Email or Password", 401));
+    }
+
+    if (user.role !== "admin") {
+        return next(new ErrorHandler("This account is not authorized for admin access", 403));
+    }
+
+    sendToken(user, 200, res);
+});
+
 // Logout User
 exports.logoutUser = asyncErrorHandler(async (req, res, next) => {
     res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
     });
 
     res.status(200).json({
@@ -96,27 +118,10 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 
     // const message = `Your password reset token is : \n\n ${resetPasswordUrl}`;
 
-    try {
-        await sendEmail({
-            email: user.email,
-            templateId: process.env.SENDGRID_RESET_TEMPLATEID,
-            data: {
-                reset_url: resetPasswordUrl
-            }
-        });
-
-        res.status(200).json({
-            success: true,
-            message: `Email sent to ${user.email} successfully`,
-        });
-
-    } catch (error) {
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-
-        await user.save({ validateBeforeSave: false });
-        return next(new ErrorHandler(error.message, 500))
-    }
+    res.status(200).json({
+        success: true,
+        message: `Password reset is not enabled for this guest storefront. Please contact the administrator for support.`,
+    });
 });
 
 // Reset Password

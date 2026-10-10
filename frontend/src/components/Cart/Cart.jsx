@@ -13,7 +13,7 @@ const Cart = () => {
     const { saveForLaterItems } = useSelector((state) => state.saveForLater);
 
     const placeOrderHandler = () => {
-        navigate('/login?redirect=shipping');
+        navigate('/shipping');
     }
 
     return (
@@ -22,23 +22,28 @@ const Cart = () => {
             <main className="w-full mt-20">
 
                 {/* <!-- row --> */}
-                <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-11/12 mt-0 sm:mt-4 m-auto sm:mb-7">
+                <div className="flex flex-col md:flex-row gap-3.5 w-full md:w-11/12 mt-0 md:mt-4 m-auto md:mb-7 px-2 sm:px-0">
 
                     {/* <!-- cart column --> */}
                     <div className="flex-1">
 
                         {/* <!-- cart items container --> */}
                         <div className="flex flex-col shadow bg-white">
-                            <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">My Cart ({cartItems.length})</span>
+                            <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">
+                                My Cart ({cartItems.reduce((count, item) => count + Number(item.quantity || 0), 0)})
+                            </span>
 
                             {cartItems && cartItems.length === 0 && (
                                 <EmptyCart />
                             )}
 
-                            {cartItems && cartItems.map((item) => (
-                                <CartItem {...item} inCart={true} />
-                            )
-                            )}
+                            {cartItems && cartItems.map((item, index) => (
+                                <CartItem
+                                    {...item}
+                                    inCart={true}
+                                    key={`${item.product}:${JSON.stringify(item.variant ?? null)}:${index}`}
+                                />
+                            ))}
 
                             {/* <!-- place order btn --> */}
                             <div className="flex justify-end">

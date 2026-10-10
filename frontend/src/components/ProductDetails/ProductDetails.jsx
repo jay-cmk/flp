@@ -100,8 +100,20 @@ const ProductDetails = () => {
     }
 
     const buyNow = () => {
-        addToCartHandler();
-        navigate('/shipping');
+        navigate('/shipping', {
+            state: {
+                checkoutItems: [{
+                    product: productId,
+                    name: product.name,
+                    seller: product.brand?.name,
+                    price: product.price,
+                    cuttedPrice: product.cuttedPrice,
+                    image: product.images?.[0]?.url || '',
+                    stock: product.stock,
+                    quantity: 1,
+                }],
+            },
+        });
     }
 
     useEffect(() => {
@@ -134,10 +146,10 @@ const ProductDetails = () => {
                     <main className="mt-12 sm:mt-0">
 
                         {/* <!-- product image & description container --> */}
-                        <div className="w-full flex flex-col sm:flex-row bg-white sm:p-2 relative">
+                        <div className="w-full flex flex-col md:flex-row bg-white sm:p-2 relative">
 
                             {/* <!-- image wrapper --> */}
-                            <div className="w-full sm:w-2/5 sm:sticky top-16 sm:h-screen">
+                            <div className="w-full md:w-2/5 md:sticky md:top-16 md:h-screen">
                                 {/* <!-- imgbox --> */}
                                 <div className="flex flex-col gap-3 m-3">
                                     <div className="w-full h-full pb-6 border relative">
@@ -147,21 +159,21 @@ const ProductDetails = () => {
                                             ))}
                                         </Slider>
                                         <div className="absolute top-4 right-4 shadow-lg bg-white w-9 h-9 border flex items-center justify-center rounded-full">
-                                            <span onClick={addToWishlistHandler} className={`${itemInWishlist ? "text-red-500" : "hover:text-red-500 text-gray-300"} cursor-pointer`}><FavoriteIcon sx={{ fontSize: "18px" }} /></span>
+                                            <button type="button" onClick={addToWishlistHandler} aria-label={itemInWishlist ? 'Remove from wishlist' : 'Add to wishlist'} className={`${itemInWishlist ? "text-red-500" : "hover:text-red-500 text-gray-300"} min-h-11 min-w-11 flex items-center justify-center`}><FavoriteIcon sx={{ fontSize: "18px" }} /></button>
                                         </div>
                                     </div>
 
-                                    <div className="w-full flex gap-3">
+                                    <div className="w-full flex gap-2 sm:gap-3">
                                         {/* <!-- add to cart btn --> */}
                                         {product.stock > 0 && (
-                                            <button onClick={itemInCart ? goToCart : addToCartHandler} className="p-4 w-1/2 flex items-center justify-center gap-2 text-white bg-primary-yellow rounded-sm shadow hover:shadow-lg">
-                                                <ShoppingCartIcon />
-                                                {itemInCart ? "GO TO CART" : "ADD TO CART"}
+                                            <button onClick={itemInCart ? goToCart : addToCartHandler} className="min-w-0 px-2 py-3 sm:p-4 w-1/2 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base text-white bg-primary-yellow rounded-sm shadow hover:shadow-lg">
+                                                <ShoppingCartIcon fontSize="small" />
+                                                <span>{itemInCart ? "GO TO CART" : "ADD TO CART"}</span>
                                             </button>
                                         )}
-                                        <button onClick={buyNow} disabled={product.stock < 1 ? true : false} className={product.stock < 1 ? "p-4 w-full flex items-center justify-center gap-2 text-white bg-red-600 cursor-not-allowed rounded-sm shadow hover:shadow-lg" : "p-4 w-1/2 flex items-center justify-center gap-2 text-white bg-primary-orange rounded-sm shadow hover:shadow-lg"}>
-                                            <FlashOnIcon />
-                                            {product.stock < 1 ? "OUT OF STOCK" : "BUY NOW"}
+                                        <button onClick={buyNow} disabled={product.stock < 1 ? true : false} className={product.stock < 1 ? "min-w-0 px-2 py-3 sm:p-4 w-full flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base text-white bg-red-600 cursor-not-allowed rounded-sm shadow hover:shadow-lg" : "min-w-0 px-2 py-3 sm:p-4 w-1/2 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base text-white bg-primary-orange rounded-sm shadow hover:shadow-lg"}>
+                                            <FlashOnIcon fontSize="small" />
+                                            <span>{product.stock < 1 ? "OUT OF STOCK" : "BUY NOW"}</span>
                                         </button>
                                         {/* <!-- add to cart btn --> */}
                                     </div>
@@ -187,7 +199,7 @@ const ProductDetails = () => {
 
                                     {/* <!-- price desc --> */}
                                     <span className="text-primary-green text-sm font-medium">Special Price</span>
-                                    <div className="flex items-baseline gap-2 text-3xl font-medium">
+                                    <div className="flex flex-wrap items-baseline gap-2 text-2xl sm:text-3xl font-medium">
                                         <span className="text-gray-800">₹{product.price?.toLocaleString()}</span>
                                         <span className="text-base text-gray-500 line-through">₹{product.cuttedPrice?.toLocaleString()}</span>
                                         <span className="text-base text-primary-green">{getDiscount(product.price, product.cuttedPrice)}%&nbsp;off</span>
@@ -208,14 +220,14 @@ const ProductDetails = () => {
                                     {/* <!-- banks offers --> */}
 
                                     {/* <!-- warranty & brand --> */}
-                                    <div className="flex gap-8 mt-2 items-center text-sm">
+                                    <div className="flex flex-wrap gap-3 sm:gap-8 mt-2 items-center text-sm">
                                         <img draggable="false" className="w-20 h-8 p-0.5 border object-contain" src={product.brand?.logo.url} alt={product.brand && product.brand.name} />
                                         <span>{product.warranty} Year Warranty <Link className="font-medium text-primary-blue" to="/">Know More</Link></span>
                                     </div>
                                     {/* <!-- warranty & brand --> */}
 
                                     {/* <!-- delivery details --> */}
-                                    <div className="flex gap-16 mt-4 items-center text-sm font-medium">
+                                    <div className="flex flex-wrap gap-4 sm:gap-16 mt-4 items-center text-sm font-medium">
                                         <p className="text-gray-500">Delivery</p>
                                         <span>Delivery by {getDeliveryDate()}</span>
                                     </div>

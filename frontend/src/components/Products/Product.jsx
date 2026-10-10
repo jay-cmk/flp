@@ -28,11 +28,11 @@ const Product = ({ _id, name, images, ratings, numOfReviews, price, cuttedPrice 
     return (
         <div className="flex flex-col items-start gap-2 px-4 py-6 relative hover:shadow-lg rounded-sm">
             {/* <!-- image & product title --> */}
-            <Link to={`/product/${_id}`} className="flex flex-col items-center text-center group">
-                <div className="w-44 h-48">
+            <Link to={`/product/${_id}`} className="flex w-full min-w-0 flex-col items-center text-center group">
+                <div className="w-full max-w-44 h-48">
                     <img draggable="false" className="w-full h-full object-contain" src={images && images[0].url} alt="" />
                 </div>
-                <h2 className="text-sm mt-4 group-hover:text-primary-blue text-left">{name.length > 85 ? `${name.substring(0, 85)}...` : name}</h2>
+                <h2 className="w-full break-words text-sm mt-4 group-hover:text-primary-blue text-left">{name.length > 85 ? `${name.substring(0, 85)}...` : name}</h2>
             </Link>
             {/* <!-- image & product title --> */}
 
@@ -46,7 +46,7 @@ const Product = ({ _id, name, images, ratings, numOfReviews, price, cuttedPrice 
                 {/* <!-- rating badge --> */}
 
                 {/* <!-- price container --> */}
-                <div className="flex items-center gap-1.5 text-md font-medium">
+                <div className="flex flex-wrap items-baseline gap-1.5 text-md font-medium">
                     <span>₹{price.toLocaleString()}</span>
                     <span className="text-gray-500 line-through text-xs">₹{cuttedPrice.toLocaleString()}</span>
                     <span className="text-xs text-primary-green">{getDiscount(price, cuttedPrice)}%&nbsp;off</span>
@@ -56,7 +56,7 @@ const Product = ({ _id, name, images, ratings, numOfReviews, price, cuttedPrice 
             {/* <!-- product description --> */}
 
             {/* <!-- wishlist badge --> */}
-            <span onClick={addToWishlistHandler} className={`${itemInWishlist ? "text-red-500" : "hover:text-red-500 text-gray-300"} absolute top-6 right-6 cursor-pointer`}><FavoriteIcon sx={{ fontSize: "18px" }} /></span>
+            <button type="button" onClick={addToWishlistHandler} aria-label={itemInWishlist ? 'Remove from wishlist' : 'Add to wishlist'} className={`${itemInWishlist ? "text-red-500" : "hover:text-red-500 text-gray-300"} absolute top-3 right-3 min-h-11 min-w-11 flex items-center justify-center cursor-pointer`}><FavoriteIcon sx={{ fontSize: "18px" }} /></button>
             {/* <!-- wishlist badge --> */}
 
         </div>

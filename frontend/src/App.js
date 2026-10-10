@@ -1,8 +1,9 @@
-import WebFont from 'webfontloader';
+﻿import WebFont from 'webfontloader';
 import Footer from './components/Layouts/Footer/Footer';
 import Header from './components/Layouts/Header/Header';
 import Login from './components/User/Login';
 import Register from './components/User/Register';
+import AdminLogin from './components/User/AdminLogin';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { loadUser } from './actions/userAction';
 import { useEffect } from 'react';
@@ -21,7 +22,6 @@ import Shipping from './components/Cart/Shipping';
 import OrderConfirm from './components/Cart/OrderConfirm';
 import Payment from './components/Cart/Payment';
 import OrderStatus from './components/Cart/OrderStatus';
-import OrderSuccess from './components/Cart/OrderSuccess';
 import MyOrders from './components/Order/MyOrders';
 import OrderDetails from './components/Order/OrderDetails';
 import Dashboard from './components/Admin/Dashboard';
@@ -36,48 +36,36 @@ import UpdateUser from './components/Admin/UpdateUser';
 import ReviewsTable from './components/Admin/ReviewsTable';
 import Wishlist from './components/Wishlist/Wishlist';
 import NotFound from './components/NotFound';
+import Contact from './components/Pages/Contact';
+import ReturnPolicy from './components/Pages/ReturnPolicy';
+import PrivacyPolicy from './components/Pages/PrivacyPolicy';
+import PaymentSettings from './components/Admin/PaymentSettings';
 
 function App() {
 
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  // const [stripeApiKey, setStripeApiKey] = useState("");
-
-  // async function getStripeApiKey() {
-  //   const { data } = await axios.get('/api/v1/stripeapikey');
-  //   setStripeApiKey(data.stripeApiKey);
-  // }
 
   useEffect(() => {
     WebFont.load({
       google: {
-        families: ["Roboto:300,400,500,600,700"]
+        families: ['Roboto:300,400,500,600,700']
       },
     });
   });
 
   useEffect(() => {
     dispatch(loadUser());
-    // getStripeApiKey();
   }, [dispatch]);
 
-  // always scroll to top on route/path change
   useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "smooth"
+      behavior: 'smooth'
     });
-  }, [pathname])
+  }, [pathname]);
 
-  // disable right click
-  window.addEventListener("contextmenu", (e) => e.preventDefault());
-  window.addEventListener("keydown", (e) => {
-    if (e.keyCode == 123) e.preventDefault();
-    if (e.ctrlKey && e.shiftKey && e.keyCode === 73) e.preventDefault();
-    if (e.ctrlKey && e.shiftKey && e.keyCode === 74) e.preventDefault();
-  });
-  
   return (
     <>
       <Header />
@@ -85,85 +73,50 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/return-policy" element={<ReturnPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:keyword" element={<Products />} />
 
         <Route path="/cart" element={<Cart />} />
+        <Route path="/shipping" element={<Shipping />} />
+        <Route path="/order/confirm" element={<OrderConfirm />} />
+        <Route path="/process/payment" element={<Payment />} />
 
-        {/* order process */}
-        <Route path="/shipping" element={
-          <ProtectedRoute>
-            <Shipping />
-          </ProtectedRoute>
-        } ></Route>
-
-        <Route path="/order/confirm" element={
-          <ProtectedRoute>
-            <OrderConfirm />
-          </ProtectedRoute>
-        } ></Route>
-
-        <Route path="/process/payment" element={
-          <ProtectedRoute>
-            {/* // stripeApiKey && ( */}
-            {/* // <Elements stripe={loadStripe(stripeApiKey)}> */}
-            <Payment />
-            {/* // </Elements> */}
-            {/* ) */}
-          </ProtectedRoute>
-        } ></Route>
-
-        <Route path="/orders/success" element={<OrderSuccess success={true} />} />
-        <Route path="/orders/failed" element={<OrderSuccess success={false} />} />
-        {/* order process */}
-
-        <Route path="/order/:id" element={
-          <ProtectedRoute>
-            <OrderStatus />
-          </ProtectedRoute>
-        } ></Route>
-
-        <Route path="/orders" element={
-          <ProtectedRoute>
-            <MyOrders />
-          </ProtectedRoute>
-        }></Route>
-
-        <Route path="/order_details/:id" element={
-          <ProtectedRoute>
-            <OrderDetails />
-          </ProtectedRoute>
-        }></Route>
+        <Route path="/order/:id" element={<OrderStatus />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/order_details/:id" element={<OrderDetails />} />
 
         <Route path="/account" element={
           <ProtectedRoute>
             <Account />
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/account/update" element={
           <ProtectedRoute>
             <UpdateProfile />
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/password/update" element={
           <ProtectedRoute>
             <UpdatePassword />
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/password/forgot" element={<ForgotPassword />} />
-
         <Route path="/password/reset/:token" element={<ResetPassword />} />
 
         <Route path="/wishlist" element={
           <ProtectedRoute>
             <Wishlist />
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/dashboard" element={
           <ProtectedRoute isAdmin={true}>
@@ -171,7 +124,7 @@ function App() {
               <MainData />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/orders" element={
           <ProtectedRoute isAdmin={true}>
@@ -179,7 +132,7 @@ function App() {
               <OrderTable />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/order/:id" element={
           <ProtectedRoute isAdmin={true}>
@@ -187,7 +140,7 @@ function App() {
               <UpdateOrder />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/products" element={
           <ProtectedRoute isAdmin={true}>
@@ -195,7 +148,7 @@ function App() {
               <ProductTable />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/new_product" element={
           <ProtectedRoute isAdmin={true}>
@@ -203,7 +156,7 @@ function App() {
               <NewProduct />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/product/:id" element={
           <ProtectedRoute isAdmin={true}>
@@ -211,7 +164,7 @@ function App() {
               <UpdateProduct />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/users" element={
           <ProtectedRoute isAdmin={true}>
@@ -219,7 +172,7 @@ function App() {
               <UserTable />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/user/:id" element={
           <ProtectedRoute isAdmin={true}>
@@ -227,7 +180,7 @@ function App() {
               <UpdateUser />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
         <Route path="/admin/reviews" element={
           <ProtectedRoute isAdmin={true}>
@@ -235,9 +188,17 @@ function App() {
               <ReviewsTable />
             </Dashboard>
           </ProtectedRoute>
-        } ></Route>
+        } />
 
-        <Route path="*" element={<NotFound />}></Route>
+        <Route path="/admin/payment-qr" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={6}>
+              <PaymentSettings />
+            </Dashboard>
+          </ProtectedRoute>
+        } />
+
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
       <Footer />

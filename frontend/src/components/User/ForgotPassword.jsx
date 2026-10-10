@@ -73,7 +73,7 @@ const ForgotPassword = () => {
 
                                     {/* <!-- button container --> */}
                                     <div className="flex flex-col gap-2.5 mt-2 mb-32">
-                                        <p className="text-xs text-primary-grey text-left">By continuing, you agree to Flipkart's <a href="https://www.flipkart.com/pages/terms" className="text-primary-blue"> Terms of Use</a> and <a href="https://www.flipkart.com/pages/privacypolicy" className="text-primary-blue"> Privacy Policy.</a></p>
+                                        <p className="text-xs text-primary-grey text-left">By continuing, you agree to Flipkart's <a href="https://www.flipkart.com/pages/terms" className="text-primary-blue"> Terms of Use</a> and <Link to="/privacy-policy" className="text-primary-blue"> Privacy Policy.</Link></p>
                                         <button type="submit" className="text-white py-3 w-full bg-primary-orange shadow rounded-sm font-medium">Submit</button>
                                     </div>
                                     {/* <!-- button container --> */}
