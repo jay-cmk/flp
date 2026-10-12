@@ -34,11 +34,11 @@ The frontend and backend are independent applications. Install dependencies from
 1. Copy `backend/.env.example` to `backend/.env` and provide the required MongoDB, JWT, and payment settings. Configure Cloudinary credentials if you use product image or avatar uploads.
 2. In one terminal, run `cd backend`, `npm install`, then `npm start`.
 3. In another terminal, run `cd frontend`, `npm install`, then `npm start`.
-4. The Create React App development proxy sends `/api/v1` requests to `http://localhost:4000`. For a phone on the same Wi-Fi, leave the frontend `REACT_APP_API_URL` unset so the proxy is used.
+4. The frontend runs at `http://localhost:5173`. Set `REACT_APP_API_URL=http://localhost:4000` to use a locally running backend, or use the configured Render API URL to develop against the deployed backend. The backend development CORS configuration allows the exact `http://localhost:5173` origin.
 
 An existing ignored `backend/config/config.env` is still accepted as a local configuration fallback; new setups should use `backend/.env`.
 
-Backend variables: `PORT`, `MONGO_URI`, `FRONTEND_URL`, `JWT_SECRET`, `JWT_EXPIRE`, `COOKIE_EXPIRE`, `CLOUDINARY_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `PAYMENT_UPI_ID`, `PAYMENT_RECEIVER_NAME`, and `NODE_ENV`. `PORT` is supplied by Render in deployment. `FRONTEND_URL` must be the exact browser origin (scheme, hostname, and optional port) and accepts multiple comma-separated origins. Do not put the API/backend URL here. Production startup fails when no frontend origin is configured. Local CRA requests use `http://localhost:3000` and its proxy to `http://localhost:4000`; CRA rewrites the proxied request's `Origin` to the proxy target with a trailing slash (`http://localhost:4000/`, or `http://127.0.0.1:4000/` on Windows). These proxy-only values are allowed only in development. In development, `REACT_APP_API_URL` is ignored. For production, set `REACT_APP_API_URL` in the frontend deployment to the actual backend API origin and set backend `FRONTEND_URL` to the actual frontend's browser origin from that deployment. The two values are obtained from the respective deployment settings/browser URL and must not be substituted for each other. `REACT_APP_API_URL` is public and must never contain a secret.
+Backend variables: `PORT`, `MONGO_URI`, `FRONTEND_URL`, `JWT_SECRET`, `JWT_EXPIRE`, `COOKIE_EXPIRE`, `CLOUDINARY_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `PAYMENT_UPI_ID`, `PAYMENT_RECEIVER_NAME`, and `NODE_ENV`. `PORT` is supplied by Render in deployment. `FRONTEND_URL` must contain exact browser origins (scheme, hostname, and optional port) and accepts multiple comma-separated origins. Do not put the API/backend URL here. Production startup fails when no frontend origin is configured. The local frontend origin is `http://localhost:5173`; when using the deployed API during development, include it in Render's `FRONTEND_URL` as well. For production, set `REACT_APP_API_URL` in the frontend deployment to the actual backend API origin and set backend `FRONTEND_URL` to the actual frontend's browser origin from that deployment. The two values must not be substituted for each other. `REACT_APP_API_URL` is public and must never contain a secret.
 
 ### First admin account
 
@@ -53,7 +53,15 @@ To reset one existing admin password, run `npm run reset-admin -- <admin-email> 
 - Start Command: `npm start`
 - Health Check Path: `/health`
 
-Set the backend environment variables in Render, including `NODE_ENV=production`, `MONGO_URI`, a strong `JWT_SECRET`, and `FRONTEND_URL` set to the deployed Vercel origin (for example, `https://your-store.vercel.app`). Add Cloudinary credentials if you use product image or avatar uploads. Add any custom frontend origin as a comma-separated additional value. The backend listens on Render's `PORT` and `0.0.0.0`.
+Set the backend environment variables in Render, including `NODE_ENV=production`, `MONGO_URI`, a strong `JWT_SECRET`, and `FRONTEND_URL` set to the exact deployed frontend origin. For Netlify, include its actual site origin (for example, `https://your-actual-site.netlify.app`) and preserve any existing production frontend origins as comma-separated values. Do not include paths or the backend URL. Add Cloudinary credentials if you use product image or avatar uploads. The backend listens on Render's `PORT` and `0.0.0.0`.
+
+### Netlify frontend
+
+- Base directory: `frontend`
+- Build command: `npm run build`
+- Publish directory: `build`
+
+Set `REACT_APP_API_URL` in the Netlify site environment variables to `https://flp-59cw.onrender.com` (without a trailing slash). Create React App embeds `REACT_APP_*` variables at build time, so trigger a new deploy after changing this value. The `public/_redirects` rule serves the React app for direct routes and page refreshes. Admin authentication uses credentialed cookies; `FRONTEND_URL` on Render must include the exact Netlify origin.
 
 ### Vercel frontend
 

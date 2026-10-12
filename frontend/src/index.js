@@ -8,10 +8,10 @@ import { Provider } from 'react-redux';
 import store from './store';
 import { SnackbarProvider } from 'notistack';
 
-const apiUrl = process.env.REACT_APP_API_URL;
-axios.defaults.baseURL = process.env.NODE_ENV === 'production' && apiUrl
-  ? apiUrl.replace(/\/+$/, '')
-  : undefined;
+const apiUrl =
+  process.env.REACT_APP_API_URL;
+
+axios.defaults.baseURL = new URL(apiUrl).origin;
 axios.defaults.withCredentials = true;
 
 ReactDOM.render(

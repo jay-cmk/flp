@@ -45,9 +45,6 @@ const MyOrders = () => {
 
     useEffect(() => {
         setSearch("");
-        // console.log(status);
-        // console.log(typeof orderTime);
-        // console.log(orderTime);
 
         if (!status && +orderTime === 0) {
             setFilteredOrders(orders);
@@ -82,8 +79,7 @@ const MyOrders = () => {
             const filteredArr = orders.filter((order) => order.orderStatus === status);
             setFilteredOrders(filteredArr);
         }
-        // eslint-disable-next-line
-    }, [status, orderTime]);
+    }, [status, orderTime, orders]);
 
     const searchOrders = (e) => {
         e.preventDefault();

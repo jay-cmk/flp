@@ -130,7 +130,6 @@ const ProductDetails = () => {
             dispatch({ type: NEW_REVIEW_RESET });
         }
         dispatch(getProductDetails(productId));
-        // eslint-disable-next-line
     }, [dispatch, productId, error, reviewError, success, enqueueSnackbar]);
 
     useEffect(() => {

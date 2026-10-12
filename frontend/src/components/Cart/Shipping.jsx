@@ -1,4 +1,4 @@
-﻿import FormControl from '@mui/material/FormControl';
+import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
@@ -28,7 +28,7 @@ const Shipping = () => {
     const [email, setEmail] = useState(shippingInfo?.email || '');
     const [address, setAddress] = useState(shippingInfo?.address || '');
     const [city, setCity] = useState(shippingInfo?.city || '');
-    const [country, setCountry] = useState('IN');
+    const country = 'IN';
     const [state, setState] = useState(shippingInfo?.state || '');
     const [pincode, setPincode] = useState(shippingInfo?.pincode || '');
     const [phoneNo, setPhoneNo] = useState(shippingInfo?.phoneNo || '');

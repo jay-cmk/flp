@@ -37,7 +37,11 @@ const PaymentQrDialog = ({ open, onClose, order }) => {
             })
             .catch((requestError) => {
                 if (mounted) {
-                    setError(requestError?.response?.data?.message || 'Unable to load the payment QR. Please try again.');
+                    const message = requestError?.response?.data?.message
+                        || (!requestError?.response
+                            ? 'Could not connect to the payment API. Check your connection and confirm the backend FRONTEND_URL includes this site’s exact origin.'
+                            : 'Unable to load the payment QR. Please try again.');
+                    setError(message);
                 }
             })
             .finally(() => {

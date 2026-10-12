@@ -1,4 +1,4 @@
-﻿import WebFont from 'webfontloader';
+import WebFont from 'webfontloader';
 import Footer from './components/Layouts/Footer/Footer';
 import Header from './components/Layouts/Header/Header';
 import Login from './components/User/Login';
