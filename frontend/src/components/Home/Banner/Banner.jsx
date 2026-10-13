@@ -14,7 +14,7 @@ import oppo from '../../../assets/images/Banners/oppo-reno7.webp';
 export const PreviousBtn = ({ className, onClick }) => {
   return (
     <div className={className} onClick={onClick}>
-      <ArrowBackIosIcon />
+      <ArrowBackIosIcon sx={{ fontSize: 16 }} />
     </div>
   )
 }
@@ -22,7 +22,7 @@ export const PreviousBtn = ({ className, onClick }) => {
 export const NextBtn = ({ className, onClick }) => {
   return (
     <div className={className} onClick={onClick}>
-      <ArrowForwardIosIcon />
+      <ArrowForwardIosIcon sx={{ fontSize: 16 }} />
     </div>
   )
 }
@@ -31,12 +31,14 @@ const Banner = () => {
 
   const settings = {
     autoplay: true,
-    autoplaySpeed: 2000,
-    dots: false,
+    autoplaySpeed: 3000,
+    dots: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+    pauseOnHover: true,
+    swipeToSlide: true,
     prevArrow: <PreviousBtn />,
     nextArrow: <NextBtn />,
   };
@@ -45,10 +47,10 @@ const Banner = () => {
 
   return (
     <>
-      <section className="h-44 sm:h-72 w-full rounded-sm shadow relative overflow-hidden">
-        <Slider {...settings}>
+      <section className="relative w-full overflow-hidden rounded-xl shadow-sm ring-1 ring-gray-100">
+        <Slider {...settings} className="banner-slider">
           {banners.map((el, i) => (
-            <img draggable="false" className="h-44 sm:h-72 w-full object-cover" src={el} alt="banner" key={i} />
+            <img draggable="false" className="h-44 w-full object-cover sm:h-60 md:h-72" src={el} alt="banner" key={i} />
           ))}
         </Slider>
       </section>

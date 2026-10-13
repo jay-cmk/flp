@@ -50,19 +50,16 @@ const catNav = [
 
 const Categories = () => {
     return (
-        <section className="hidden sm:block bg-white mt-10 mb-4 min-w-full px-12 py-1 shadow overflow-hidden">
-
-            <div className="flex items-center justify-between mt-4">
-
+        <section className="mt-2 w-full overflow-hidden rounded-b-lg bg-white shadow-sm ring-1 ring-gray-100">
+            <div className="hide-scrollbar flex items-stretch gap-3 overflow-x-auto px-3 py-3 sm:gap-5 sm:px-5">
                 {catNav.map((item, i) => (
-                    <Link to={`/products?category=${item.name}`} className="flex flex-col gap-1 items-center p-2 group" key={i}>
-                        <div className="h-16 w-16">
+                    <Link to={`/products?category=${item.name}`} className="group flex min-w-[72px] flex-col items-center gap-2 rounded-md px-1 py-2 text-center sm:min-w-[90px]" key={i}>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 p-2 sm:h-14 sm:w-14">
                             <img draggable="false" className="h-full w-full object-contain" src={item.icon} alt={item.name} />
                         </div>
-                        <span className="text-sm text-gray-800 font-medium group-hover:text-primary-blue">{item.name}</span>
+                        <span className="text-[11px] font-medium leading-tight text-gray-800 transition-colors group-hover:text-primary-blue sm:text-xs">{item.name}</span>
                     </Link>
                 ))}
-
             </div>
         </section>
     );

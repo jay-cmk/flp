@@ -14,7 +14,7 @@ const Product = (props) => {
     const { enqueueSnackbar } = useSnackbar();
 
     const { wishlistItems } = useSelector((state) => state.wishlist);
-    
+
     const itemInWishlist = wishlistItems.some((i) => i.product === _id);
 
     const addToWishlistHandler = () => {
@@ -28,39 +28,28 @@ const Product = (props) => {
     }
 
     return (
-        <div className="flex flex-col items-center gap-2 px-2 py-6 relative">
-            {/* <!-- image & product title --> */}
-            <Link to={`/product/${_id}`} className="flex flex-col items-center text-center group">
-                <div className="w-36 h-36">
-                    <img draggable="false" className="w-full h-full object-contain" src={images[0].url} alt={name} />
+        <div className="relative flex flex-col items-center gap-2 px-2 py-4">
+            <Link to={`/product/${_id}`} className="group flex w-full flex-col items-center text-center">
+                <div className="h-28 w-28 rounded-lg bg-gray-50 p-2 sm:h-32 sm:w-32">
+                    <img draggable="false" className="h-full w-full object-contain" src={images[0].url} alt={name} />
                 </div>
-                <h2 className="text-sm mt-4 group-hover:text-primary-blue">{name.length > 50 ? `${name.substring(0, 50)}...` : name}</h2>
+                <h2 className="mt-3 max-w-[150px] text-xs font-medium text-gray-800 transition-colors group-hover:text-primary-blue sm:text-sm">{name.length > 50 ? `${name.substring(0, 50)}...` : name}</h2>
             </Link>
-            {/* <!-- image & product title --> */}
 
-            {/* <!-- product description --> */}
-            <div className="flex flex-col gap-2 items-center">
-                {/* <!-- rating badge --> */}
-                <span className="text-sm text-gray-500 font-medium flex gap-2 items-center">
-                    <span className="text-xs px-1.5 py-0.5 bg-primary-green rounded-sm text-white flex items-center gap-0.5">{ratings.toFixed(1)} <StarIcon sx={{ fontSize: "14px" }} /></span>
+            <div className="flex flex-col items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 sm:text-sm">
+                    <span className="flex items-center gap-0.5 rounded-sm bg-primary-green px-1.5 py-0.5 text-[10px] font-semibold text-white sm:text-xs">{ratings.toFixed(1)} <StarIcon sx={{ fontSize: "12px" }} /></span>
                     <span>({numOfReviews.toLocaleString()})</span>
                 </span>
-                {/* <!-- rating badge --> */}
 
-                {/* <!-- price container --> */}
-                <div className="flex items-center gap-1.5 text-md font-medium">
+                <div className="flex flex-wrap items-center justify-center gap-1 text-center text-[11px] font-medium sm:text-sm">
                     <span>₹{price.toLocaleString()}</span>
-                    <span className="text-gray-500 line-through text-xs">₹{cuttedPrice.toLocaleString()}</span>
-                    <span className="text-xs text-primary-green">{getDiscount(price, cuttedPrice)}%&nbsp;off</span>
+                    <span className="text-xs text-gray-500 line-through">₹{cuttedPrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-primary-green sm:text-xs">{getDiscount(price, cuttedPrice)}% off</span>
                 </div>
-                {/* <!-- price container --> */}
             </div>
-            {/* <!-- product description --> */}
 
-            {/* <!-- wishlist badge --> */}
-            <span onClick={addToWishlistHandler} className={`${itemInWishlist ? "text-red-500" : "hover:text-red-500 text-gray-300"} absolute top-5 right-2 cursor-pointer`}><FavoriteIcon sx={{ fontSize: "16px" }} /></span>
-            {/* <!-- wishlist badge --> */}
-
+            <span onClick={addToWishlistHandler} className={`${itemInWishlist ? "text-red-500" : "text-gray-300 hover:text-red-500"} absolute right-2 top-4 cursor-pointer`}><FavoriteIcon sx={{ fontSize: "16px" }} /></span>
         </div>
     );
 };

@@ -19,34 +19,34 @@ const Header = () => {
   const [toggleSecondaryDropDown, setToggleSecondaryDropDown] = useState(false);
 
   return (
-    <header className="bg-primary-blue fixed top-0 py-2.5 w-full z-10">
-      <div className="w-full sm:w-9/12 px-2 sm:px-4 m-auto flex justify-between items-center relative gap-2">
-        <div className="flex items-center flex-1 min-w-0">
-          <Link className="h-7 w-12 flex-shrink-0 mr-1 sm:mr-4" to="/" aria-label="Flipkart home">
+    <header className="fixed top-0 z-30 w-full bg-primary-blue shadow-sm">
+      <div className="mx-auto flex w-full max-w-[1280px] items-center gap-2 px-2 py-2 sm:px-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <Link className="mr-1 flex h-7 w-12 flex-shrink-0 sm:mr-3" to="/" aria-label="Flipkart home">
             <img draggable="false" className="h-full w-full object-contain" src={logo} alt="Flipkart Logo" />
           </Link>
           <Searchbar />
         </div>
 
-        <div className="flex flex-shrink-0 items-center justify-between ml-1 sm:ml-0 gap-1 sm:gap-7 relative">
+        <div className="relative flex flex-shrink-0 items-center justify-between gap-1 sm:gap-5">
           {isAuthenticated ? (
-            <button type="button" className="userDropDown flex items-center text-white font-medium gap-1 cursor-pointer max-w-20 sm:max-w-none truncate" onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)} aria-expanded={togglePrimaryDropDown}>{user.name && user.name.split(' ', 1)}
+            <button type="button" className="userDropDown flex max-w-[84px] items-center gap-1 truncate text-sm font-medium text-white sm:max-w-none" onClick={() => setTogglePrimaryDropDown(!togglePrimaryDropDown)} aria-expanded={togglePrimaryDropDown}>{user.name && user.name.split(' ', 1)}
               <span>{togglePrimaryDropDown ? <ExpandLessIcon sx={{ fontSize: '16px' }} /> : <ExpandMoreIcon sx={{ fontSize: '16px' }} />}</span>
             </button>
           ) : null}
 
           {togglePrimaryDropDown && <PrimaryDropDownMenu setTogglePrimaryDropDown={setTogglePrimaryDropDown} user={user} />}
 
-          <span className="moreDropDown hidden sm:flex items-center text-white font-medium gap-1 cursor-pointer" onClick={() => setToggleSecondaryDropDown(!toggleSecondaryDropDown)}>More
+          <span className="moreDropDown hidden items-center gap-1 text-sm font-medium text-white md:flex" onClick={() => setToggleSecondaryDropDown(!toggleSecondaryDropDown)}>More
             <span>{toggleSecondaryDropDown ? <ExpandLessIcon sx={{ fontSize: '16px' }} /> : <ExpandMoreIcon sx={{ fontSize: '16px' }} />}</span>
           </span>
 
           {toggleSecondaryDropDown && <SecondaryDropDownMenu />}
 
-          <Link to="/cart" className="flex items-center text-white font-medium gap-1 sm:gap-2 relative" aria-label={`Cart${cartItemCount ? `, ${cartItemCount} items` : ''}`}>
-            <span><ShoppingCartIcon /></span>
+          <Link to="/cart" className="relative flex items-center gap-1 text-sm font-medium text-white sm:gap-2" aria-label={`Cart${cartItemCount ? `, ${cartItemCount} items` : ''}`}>
+            <span className="flex h-7 w-7 items-center justify-center"><ShoppingCartIcon sx={{ fontSize: 20 }} /></span>
             {cartItemCount > 0 &&
-              <div className="min-w-5 h-5 px-1 bg-red-500 text-xs rounded-full absolute -top-2 left-3 flex justify-center items-center border">
+              <div className="absolute -top-1 left-4 flex h-4 min-w-[16px] items-center justify-center rounded-full border border-white bg-red-500 px-1 text-[10px] font-bold text-white">
                 {cartItemCount}
               </div>
             }
