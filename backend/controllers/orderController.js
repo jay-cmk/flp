@@ -4,7 +4,7 @@ const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
 const ErrorHandler = require('../utils/errorHandler');
 
-const SUPPORTED_PAYMENT_METHODS = ['PHONEPE', 'GOOGLE_PAY', 'SCAN_QR'];
+const SUPPORTED_PAYMENT_METHODS = ['UPI', 'PHONEPE', 'GOOGLE_PAY', 'SCAN_QR'];
 
 exports.newOrder = asyncErrorHandler(async (req, res, next) => {
     const { shippingInfo, orderItems, paymentMethod } = req.body;
@@ -27,7 +27,7 @@ exports.newOrder = asyncErrorHandler(async (req, res, next) => {
     }
 
     if (!SUPPORTED_PAYMENT_METHODS.includes(paymentMethod)) {
-        return next(new ErrorHandler('Select PhonePe, Google Pay, or Scan QR', 400));
+        return next(new ErrorHandler('Select UPI, PhonePe, Google Pay, or Scan QR', 400));
     }
 
     const existingOrder = await Order.findOne({ checkoutKey });

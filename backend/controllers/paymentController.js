@@ -45,8 +45,8 @@ const deleteQrAsset = async (publicId) => {
 
 exports.createPaymentIntent = asyncErrorHandler(async (req, res, next) => {
     const { orderId, paymentMethod } = req.body;
-    if (!['PHONEPE', 'GOOGLE_PAY'].includes(paymentMethod)) {
-        return next(new ErrorHandler('Select PhonePe or Google Pay for a UPI payment intent', 400));
+    if (!['UPI', 'PHONEPE', 'GOOGLE_PAY'].includes(paymentMethod)) {
+        return next(new ErrorHandler('Select UPI, PhonePe, or Google Pay for a UPI payment intent', 400));
     }
     if (!orderId || !/^[a-fA-F0-9]{24}$/.test(orderId)) {
         return next(new ErrorHandler('A valid order reference is required', 400));
@@ -60,10 +60,13 @@ exports.createPaymentIntent = asyncErrorHandler(async (req, res, next) => {
         return next(new ErrorHandler('This order is not awaiting payment', 400));
     }
 
-    const upiId = process.env.PAYMENT_UPI_ID;
+    const upiId = process.env.PAYMENT_UPI_ID || 'jayshankaryadav435@okhdfcbank';
     const receiverName = process.env.PAYMENT_RECEIVER_NAME;
-    if (!upiId || !receiverName) {
-        return next(new ErrorHandler('UPI merchant details are not configured', 503));
+    if (!receiverName) {
+        return next(new ErrorHandler('UPI merchant name is not configured', 503));
+    }
+    if (!/^[\w.-]{2,256}@[A-Za-z0-9.-]{2,64}$/.test(upiId)) {
+        return next(new ErrorHandler('UPI merchant ID is not configured correctly', 503));
     }
     if (!Number.isFinite(order.totalPrice) || order.totalPrice <= 0) {
         return next(new ErrorHandler('The validated order amount is invalid', 400));
