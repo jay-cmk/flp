@@ -5,7 +5,7 @@ const PaymentSettings = require('../models/paymentSettingsModel');
 const cloudinary = require('cloudinary');
 
 const MAX_QR_IMAGE_SIZE = 5 * 1024 * 1024;
-const MERCHANT_UPI_ID = 'jayshankaryadav435@okhdfcbank';
+const MERCHANT_UPI_ID = 'kumardheeraj11119@okicici';
 
 const getPublicQr = (settings) => {
     if (!settings?.isActive || !settings.qrImage?.url) return null;
