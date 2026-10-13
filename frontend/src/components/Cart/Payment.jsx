@@ -2,6 +2,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,6 +12,7 @@ import { newOrder } from '../../actions/orderAction';
 import { getDeliveryDate, getDiscount } from '../../utils/functions';
 import states from '../../utils/states';
 import MetaData from '../Layouts/MetaData';
+import PaymentQrDialog from './PaymentQrDialog';
 import Stepper from './Stepper';
 
 const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
@@ -50,6 +52,12 @@ const saveCheckoutOrder = (context, key, orderId) => {
     window.sessionStorage.setItem('upiCheckout', JSON.stringify({ context, key, orderId }));
 };
 
+const methods = [
+    { id: 'PHONEPE', label: 'PhonePe', description: 'Pay using PhonePe or another UPI app', Icon: PhoneAndroidIcon },
+    { id: 'GOOGLE_PAY', label: 'Google Pay', description: 'Pay using Google Pay or another UPI app', Icon: AccountBalanceWalletIcon },
+    { id: 'SCAN_QR', label: 'Scan QR Code', description: 'Scan the active store payment QR', Icon: QrCode2Icon },
+];
+
 const copyToClipboard = async (text) => {
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
@@ -82,6 +90,8 @@ const Payment = () => {
     const [paymentIntent, setPaymentIntent] = useState(null);
     const [paymentStatus, setPaymentStatus] = useState('PENDING_PAYMENT');
     const [returnedFromUpi, setReturnedFromUpi] = useState(false);
+    const [selectedMethod, setSelectedMethod] = useState('PHONEPE');
+    const [qrDialogOpen, setQrDialogOpen] = useState(false);
     const processingRef = useRef(false);
     const launchAttemptedRef = useRef(false);
     const checkoutContext = getCheckoutContext(shippingInfo, checkoutItems);
@@ -151,7 +161,7 @@ const Payment = () => {
         return () => document.removeEventListener('visibilitychange', handleReturn);
     }, [checkPaymentStatus]);
 
-    const startPayment = async () => {
+    const startPayment = async (method = selectedMethod) => {
         if (processingRef.current) return;
         if (!shippingInfo?.name || checkoutItems.length === 0) {
             enqueueSnackbar('Delivery details and checkout items are required before payment.', { variant: 'error' });
@@ -161,6 +171,7 @@ const Payment = () => {
 
         processingRef.current = true;
         setProcessing(true);
+        setSelectedMethod(method);
         try {
             let order = pendingOrder;
             const checkoutKey = getCheckoutKey(checkoutContext);
@@ -171,7 +182,7 @@ const Payment = () => {
                         product: item.product,
                         quantity: item.quantity,
                     })),
-                    paymentMethod: 'UPI',
+                    paymentMethod: method,
                 }, checkoutKey));
                 order = result?.order;
                 if (!order?._id) throw new Error('The server did not return a pending order.');
@@ -181,21 +192,26 @@ const Payment = () => {
             saveCheckoutOrder(checkoutContext, checkoutKey, order._id);
             setPaymentStatus(order.paymentInfo?.status || 'PENDING_PAYMENT');
 
-            const { data } = await axios.post('/api/v1/payment/intent', {
-                orderId: order._id,
-                paymentMethod: 'UPI',
-            });
-            const intent = data.paymentIntent;
-            if (!intent?.uri || !intent.receiverUpiId || !Number.isFinite(Number(intent.amount))) {
-                throw new Error('The server returned an incomplete UPI payment request.');
-            }
+            if (method === 'SCAN_QR') {
+                setPaymentIntent(null);
+                setQrDialogOpen(true);
+            } else {
+                const { data } = await axios.post('/api/v1/payment/intent', {
+                    orderId: order._id,
+                    paymentMethod: method,
+                });
+                const intent = data.paymentIntent;
+                if (!intent?.uri || !intent.receiverUpiId || !Number.isFinite(Number(intent.amount))) {
+                    throw new Error('The server returned an incomplete UPI payment request.');
+                }
 
-            setPaymentIntent(intent);
-            setPaymentStatus(intent.paymentStatus || 'PENDING_PAYMENT');
-            setReturnedFromUpi(false);
-            if (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent)) {
-                launchAttemptedRef.current = true;
-                window.location.assign(intent.uri);
+                setPaymentIntent(intent);
+                setPaymentStatus(intent.paymentStatus || 'PENDING_PAYMENT');
+                setReturnedFromUpi(false);
+                if (/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent)) {
+                    launchAttemptedRef.current = true;
+                    window.location.assign(intent.uri);
+                }
             }
         } catch (error) {
             enqueueSnackbar(error?.response?.data?.message || error.message || 'Unable to prepare the UPI payment.', { variant: 'error' });
@@ -203,6 +219,14 @@ const Payment = () => {
             processingRef.current = false;
             setProcessing(false);
         }
+    };
+
+    const continuePayment = () => {
+        if (selectedMethod === 'SCAN_QR' && pendingOrder) {
+            setQrDialogOpen(true);
+            return;
+        }
+        startPayment(selectedMethod);
     };
 
     const openUpiApp = () => {
@@ -327,6 +351,41 @@ const Payment = () => {
                                     <p className="mt-0.5 text-xs text-gray-600">Your UPI app chooser will list installed apps, including Google Pay if available.</p>
                                 </div>
                             </div>
+                            <div role="radiogroup" aria-label="Payment method" className="mt-4 flex flex-col gap-2">
+                                {methods.map(({ id, label, description, Icon }) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={selectedMethod === id}
+                                        onClick={() => {
+                                            setSelectedMethod(id);
+                                            setPaymentIntent(null);
+                                        }}
+                                        disabled={processing}
+                                        className={`flex min-h-16 w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
+                                            selectedMethod === id
+                                                ? 'border-2 border-primary-blue bg-blue-50'
+                                                : 'border-gray-200 bg-white hover:border-blue-300'
+                                        } ${processing ? 'cursor-wait opacity-60' : ''}`}
+                                    >
+                                        <span className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${
+                                            selectedMethod === id ? 'bg-white text-primary-blue' : 'bg-gray-50 text-gray-600'
+                                        }`}>
+                                            <Icon aria-hidden="true" sx={{ fontSize: 20 }} />
+                                        </span>
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block text-sm font-medium text-gray-900">{label}</span>
+                                            <span className="mt-0.5 block text-xs text-gray-600">{description}</span>
+                                        </span>
+                                        <span aria-hidden="true" className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border ${
+                                            selectedMethod === id ? 'border-primary-blue' : 'border-gray-400'
+                                        }`}>
+                                            {selectedMethod === id && <span className="h-2.5 w-2.5 rounded-full bg-primary-blue" />}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
 
                             {pendingOrder && (
                                 <section className={`mt-4 rounded-lg border p-3 ${
@@ -408,16 +467,25 @@ const Payment = () => {
                         </div>
                         <button
                             type="button"
-                            onClick={startPayment}
+                            onClick={continuePayment}
                             disabled={processing || paymentStatus === 'PAID'}
                             className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-orange px-4 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-wait disabled:opacity-60 sm:flex-none sm:px-8"
                         >
                             <AccountBalanceWalletIcon sx={{ fontSize: 18 }} />
-                            {processing ? 'Preparing UPI...' : 'Pay Now using UPI'}
+                            {processing
+                                ? 'Preparing payment...'
+                                : selectedMethod === 'SCAN_QR'
+                                    ? 'Show QR Code'
+                                    : `Pay with ${selectedMethod === 'GOOGLE_PAY' ? 'Google Pay' : 'PhonePe'}`}
                         </button>
                     </div>
                 </div>
             )}
+            <PaymentQrDialog
+                open={qrDialogOpen}
+                onClose={() => setQrDialogOpen(false)}
+                order={pendingOrder}
+            />
         </>
     );
 };

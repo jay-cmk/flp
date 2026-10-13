@@ -5,6 +5,7 @@ const PaymentSettings = require('../models/paymentSettingsModel');
 const cloudinary = require('cloudinary');
 
 const MAX_QR_IMAGE_SIZE = 5 * 1024 * 1024;
+const MERCHANT_UPI_ID = 'jayshankaryadav435@okhdfcbank';
 
 const getPublicQr = (settings) => {
     if (!settings?.isActive || !settings.qrImage?.url) return null;
@@ -60,7 +61,7 @@ exports.createPaymentIntent = asyncErrorHandler(async (req, res, next) => {
         return next(new ErrorHandler('This order is not awaiting payment', 400));
     }
 
-    const upiId = process.env.PAYMENT_UPI_ID || 'jayshankaryadav435@okhdfcbank';
+    const upiId = MERCHANT_UPI_ID;
     const receiverName = process.env.PAYMENT_RECEIVER_NAME;
     if (!receiverName) {
         return next(new ErrorHandler('UPI merchant name is not configured', 503));
