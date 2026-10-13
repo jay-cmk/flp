@@ -1,79 +1,67 @@
-import { useSelector } from 'react-redux';
 import CheckIcon from '@mui/icons-material/Check';
+import { Link } from 'react-router-dom';
 
-const Stepper = ({ activeStep, children, hideDeliveryAddress = false, items }) => {
+const steps = ['Address', 'Confirm details', 'Payment'];
 
-    const { user } = useSelector((state) => state.user);
-    const { shippingInfo, cartItems } = useSelector((state) => state.cart);
-    const checkoutItems = items || cartItems;
-
-    const address = shippingInfo ? `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} - ${shippingInfo.pincode}` : 'Delivery address pending';
-
-    const steps = [
-        {
-            label: 'GUEST CHECKOUT',
-            desc: <p className="font-medium text-sm">{user?.name ? user.name : 'Guest order'} <span className="text-sm font-normal">{user?.email ? user.email : 'No account required'}</span></p>
-        },
-        {
-            label: 'DELIVERY ADDRESS',
-            desc: hideDeliveryAddress ? null : <p className="font-medium text-sm">{shippingInfo?.name ? shippingInfo.name : 'Guest'} <span className="text-sm font-normal">{address}</span></p>
-        },
-        {
-            label: 'ORDER SUMMARY',
-            desc: <p className="font-medium text-sm">{checkoutItems.reduce((count, item) => count + Number(item.quantity || 0), 0)} Items</p>
-        },
-        {
-            label: 'PAYMENT',
-            desc: <p className="font-medium text-sm">PhonePe / Google Pay</p>
-        }
-    ]
-
+const Stepper = ({ activeStep, children, items = [] }) => {
     return (
-        <div className="flex flex-col gap-4">
-
-            {steps.map((step, index) => {
-
-                return (
-                    <>
-                        {activeStep === index ? (
-                            <div className="flex flex-col shadow rounded-sm">
-                                <div className="flex items-center rounded-t-sm bg-primary-blue px-6 py-2 gap-4">
-                                    <span className="h-5 w-5 flex items-center justify-center text-xs font-medium bg-white rounded-sm text-primary-blue">{index + 1}</span>
-                                    <h2 className="font-medium text-white">{step.label}</h2>
-                                </div>
-                                {children}
-                            </div>
-                        ) : (
+        <div className="flex flex-col gap-3">
+            <nav aria-label="Checkout progress" className="rounded-xl border border-gray-100 bg-white px-3 py-4 shadow-sm sm:px-5">
+                <ol className="flex items-start">
+                    {steps.map((label, index) => {
+                        const step = index + 1;
+                        const completed = step < activeStep;
+                        const active = step === activeStep;
+                        const destination = step === 1 ? '/shipping' : step === 2 ? '/order/confirm' : '/process/payment';
+                        const stepContent = (
                             <>
-                                {activeStep > index ? (
-                                    <Step isDesc={true} {...step} index={index} />
-                                ) : (
-                                    <Step isDesc={false} {...step} index={index} />
-                                )}
+                                <span className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold ${
+                                    completed || active
+                                        ? 'border-primary-blue bg-primary-blue text-white'
+                                        : 'border-gray-300 bg-white text-gray-500'
+                                }`}>
+                                    {completed ? <CheckIcon sx={{ fontSize: 16 }} /> : step}
+                                </span>
+                                <span className={`mt-1.5 text-center text-[10px] leading-tight sm:text-xs ${
+                                    active ? 'font-semibold text-primary-blue' : completed ? 'font-medium text-gray-700' : 'text-gray-500'
+                                }`}>{label}</span>
                             </>
-                        )}
-                    </>
-                )
-            })}
+                        );
 
+                        return (
+                            <li key={label} className="relative flex min-w-0 flex-1 flex-col items-center">
+                                {index < steps.length - 1 && (
+                                    <span aria-hidden="true" className={`absolute left-1/2 top-3.5 h-0.5 w-full ${
+                                        step < activeStep ? 'bg-primary-blue' : 'bg-gray-200'
+                                    }`} />
+                                )}
+                                {completed ? (
+                                    <Link
+                                        to={destination}
+                                        state={{ checkoutItems: items }}
+                                        aria-label={`Completed step: ${label}`}
+                                        className="relative z-10 flex flex-col items-center"
+                                    >
+                                        {stepContent}
+                                    </Link>
+                                ) : (
+                                    <div aria-current={active ? 'step' : undefined} className="relative z-10 flex flex-col items-center">
+                                        {stepContent}
+                                    </div>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ol>
+            </nav>
+            <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                <div className="border-b border-gray-100 bg-gray-50 px-4 py-3 sm:px-5">
+                    <h2 className="text-sm font-semibold text-gray-800 sm:text-base">{steps[activeStep - 1]}</h2>
+                </div>
+                {children}
+            </section>
         </div>
     );
 };
-
-const Step = ({ isDesc, label, desc, index }) => {
-    return (
-        <div className="flex bg-white shadow px-4 py-3 pb-4 rounded-sm">
-            <span className="mt-2 ml-2 mr-4 h-5 w-5 flex items-center justify-center text-xs font-medium bg-gray-100 rounded-sm text-primary-blue">{index + 1}</span>
-            <div className="flex flex-col mt-1 gap-0.5">
-                <h2 className="font-medium text-gray-500 flex items-center gap-2">{label}
-                    {isDesc && (
-                        <span className="text-primary-blue mb-1"><CheckIcon sx={{ fontSize: "20px" }} /></span>
-                    )}
-                </h2>
-                {isDesc && desc}
-            </div>
-        </div>
-    )
-}
 
 export default Stepper;

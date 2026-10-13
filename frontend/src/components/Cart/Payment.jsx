@@ -1,16 +1,18 @@
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { newOrder } from '../../actions/orderAction';
+import { getDeliveryDate } from '../../utils/functions';
+import states from '../../utils/states';
 import MetaData from '../Layouts/MetaData';
 import PaymentQrDialog from './PaymentQrDialog';
+import Stepper from './Stepper';
 
 const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
     minimumFractionDigits: 0,
@@ -32,8 +34,12 @@ const getCheckoutContext = (shippingInfo, items) => JSON.stringify({
 const getCheckoutKey = (context) => {
     const saved = window.sessionStorage.getItem('upiCheckout');
     if (saved) {
-        const checkout = JSON.parse(saved);
-        if (checkout.context === context && checkout.key) return checkout.key;
+        try {
+            const checkout = JSON.parse(saved);
+            if (checkout.context === context && checkout.key) return checkout.key;
+        } catch {
+            window.sessionStorage.removeItem('upiCheckout');
+        }
     }
 
     const key = makeCheckoutKey();
@@ -60,9 +66,30 @@ const Payment = () => {
     const [pendingOrder, setPendingOrder] = useState(null);
     const [paymentIntent, setPaymentIntent] = useState(null);
     const [qrDialogOpen, setQrDialogOpen] = useState(false);
-    const [selectedMethod, setSelectedMethod] = useState('SCAN_QR');
+    const [selectedMethod, setSelectedMethod] = useState('PHONEPE');
     const [paymentStatus, setPaymentStatus] = useState('PENDING_PAYMENT');
+    const [qrAvailable, setQrAvailable] = useState(false);
+    const [checkingQr, setCheckingQr] = useState(true);
+    const [qrCheckError, setQrCheckError] = useState(false);
     const checkoutContext = getCheckoutContext(shippingInfo, checkoutItems);
+    const stateName = states.find((item) => item.code === shippingInfo?.state)?.name || shippingInfo?.state;
+
+    useEffect(() => {
+        let active = true;
+        axios.get('/api/v1/payment/qr')
+            .then(({ data }) => {
+                if (active) setQrAvailable(Boolean(data.paymentQr?.url));
+            })
+            .catch(() => {
+                if (active) setQrCheckError(true);
+            })
+            .finally(() => {
+                if (active) setCheckingQr(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const displayItems = pendingOrder?.orderItems?.map((orderItem) => {
         const checkoutItem = checkoutItems.find((item) => String(item.product) === String(orderItem.product));
@@ -156,34 +183,59 @@ const Payment = () => {
     return (
         <>
             <MetaData title="Flipkart: UPI Payment" />
-            <main className="mx-auto mt-20 w-full max-w-3xl px-3 pb-32 sm:px-5 sm:pb-36">
-                <header className="mb-4 flex items-center gap-3 rounded bg-white px-3 py-3 shadow-sm sm:px-5">
+            <main className="mx-auto w-full max-w-5xl px-3 pb-32 pt-16 sm:px-5 sm:pb-36">
+                <header className="mb-3 flex items-center gap-2 rounded-xl bg-white px-2 py-2 shadow-sm sm:px-4">
                     <Link
                         to="/order/confirm"
                         state={{ checkoutItems }}
-                        aria-label="Back to order summary"
+                        aria-label="Back to confirm details"
                         className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100"
                     >
                         <ArrowBackIcon />
                     </Link>
-                    <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium tracking-wide text-gray-500">STEP 3 OF 3</p>
-                        <h1 className="text-xl font-semibold text-gray-900">Payments</h1>
+                    <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500">Checkout</p>
+                        <h1 className="text-base font-semibold text-gray-900 sm:text-lg">Payment</h1>
                     </div>
                 </header>
 
-                {checkoutItems.length === 0 ? (
+                {checkoutItems.length === 0 || !shippingInfo?.name ? (
                     <section className="rounded bg-white p-6 text-center shadow-sm">
-                        <p className="font-medium text-gray-800">There are no items to pay for.</p>
-                        <Link to="/cart" className="mt-4 inline-flex min-h-11 items-center rounded bg-primary-blue px-5 text-white">
-                            Return to cart
+                        <p className="font-medium text-gray-800">
+                            {checkoutItems.length === 0 ? 'There are no items to pay for.' : 'Add a delivery address before payment.'}
+                        </p>
+                        <Link
+                            to={checkoutItems.length === 0 ? '/cart' : '/shipping'}
+                            state={{ checkoutItems }}
+                            className="mt-4 inline-flex min-h-11 items-center rounded bg-primary-blue px-5 text-white"
+                        >
+                            {checkoutItems.length === 0 ? 'Return to cart' : 'Add delivery address'}
                         </Link>
                     </section>
                 ) : (
                     <>
-                        <section className="rounded-lg border border-blue-100 bg-[#eff7ff] p-4 shadow-sm sm:p-5" aria-labelledby="payment-order-title">
-                            <h2 id="payment-order-title" className="text-base font-semibold text-gray-900">Order summary</h2>
-                            <ul className="mt-2 divide-y divide-blue-100">
+                        <Stepper activeStep={3} items={checkoutItems}>
+                        <section className="border-b border-gray-100 bg-white px-3 py-3 sm:px-5" aria-labelledby="payment-delivery-title">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <h2 id="payment-delivery-title" className="text-xs font-semibold uppercase tracking-wide text-gray-500">Delivering to</h2>
+                                    <p className="mt-1 text-sm font-semibold text-gray-900">{shippingInfo.name} · +91 {shippingInfo.phoneNo}</p>
+                                    <p className="mt-1 break-words text-xs leading-relaxed text-gray-600">
+                                        {shippingInfo.address}, {shippingInfo.city}, {stateName} - {shippingInfo.pincode}
+                                    </p>
+                                </div>
+                                <Link to="/shipping" state={{ checkoutItems }} className="min-h-9 flex-shrink-0 rounded-md border border-primary-blue px-3 py-2 text-[10px] font-semibold uppercase text-primary-blue">Change</Link>
+                            </div>
+                        </section>
+                        <section className="border-b border-gray-100 bg-white p-3 sm:p-5" aria-labelledby="payment-order-title">
+                            <div className="mb-3 flex items-start justify-between gap-3">
+                                <div>
+                                    <h2 id="payment-order-title" className="text-sm font-semibold text-gray-900 sm:text-base">Order summary</h2>
+                                    <p className="mt-1 text-xs text-gray-500">Delivery by {getDeliveryDate()}</p>
+                                </div>
+                                <Link to="/cart" className="min-h-9 rounded-md border border-primary-blue px-3 py-2 text-[10px] font-semibold uppercase text-primary-blue">Edit cart</Link>
+                            </div>
+                            <ul className="mt-2 divide-y divide-gray-100">
                                 {displayItems.map((item, index) => {
                                     const price = Number(item.price);
                                     const quantity = Number(item.quantity);
@@ -221,17 +273,17 @@ const Payment = () => {
                                     );
                                 })}
                             </ul>
-                            <div className="mt-2 flex justify-between border-t border-blue-200 pt-3 font-semibold text-gray-900">
+                            <div className="mt-2 flex justify-between border-t border-gray-200 pt-3 text-sm font-semibold text-gray-900">
                                 <span>Total Amount</span>
                                 <span className="text-blue-700">₹{formatAmount(totalPrice)}</span>
                             </div>
                         </section>
 
-                        <section className="mt-5 rounded-lg bg-white p-4 shadow-sm sm:p-5" aria-labelledby="payment-method-heading">
+                        <section className="bg-white p-3 sm:p-5" aria-labelledby="payment-method-heading">
                             <h2 id="payment-method-heading" className="text-base font-semibold text-gray-900">UPI</h2>
-                            <p className="mt-1 text-sm text-gray-600">Pay by any UPI app</p>
+                            <p className="mt-1 text-xs text-gray-600">Choose an available UPI option. Payment is complete only after server verification.</p>
                             <div role="radiogroup" aria-label="UPI payment method" className="mt-4 flex flex-col gap-3">
-                                {methods.map(({ id, label, description, Icon }) => (
+                                {methods.filter(({ id }) => id !== 'SCAN_QR' || qrAvailable).map(({ id, label, description, Icon }) => (
                                     <button
                                         key={id}
                                         type="button"
@@ -261,30 +313,39 @@ const Payment = () => {
                                         </span>
                                     </button>
                                 ))}
-                                <div
-                                    aria-disabled="true"
-                                    className="flex min-h-[4.5rem] w-full cursor-not-allowed items-center gap-4 rounded-lg border border-gray-200 bg-gray-100 p-4 text-gray-500"
-                                >
-                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-gray-400">
-                                        <CurrencyRupeeIcon aria-hidden="true" />
-                                    </span>
-                                    <span className="min-w-0 flex-1">
-                                        <span className="block font-medium">Cash on Delivery</span>
-                                    </span>
-                                    <span className="flex-shrink-0 text-xs font-semibold tracking-wide">UNAVAILABLE</span>
-                                </div>
                             </div>
+                            {checkingQr && <p className="mt-3 text-xs text-gray-500" role="status">Checking if QR payment is configured…</p>}
+                            {!checkingQr && qrCheckError && (
+                                <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800" role="status">
+                                    QR payment options could not be checked. PhonePe and Google Pay remain available if merchant UPI details are configured.
+                                </p>
+                            )}
+                            {!checkingQr && !qrCheckError && !qrAvailable && (
+                                <p className="mt-3 text-xs text-gray-500">Cash on Delivery and QR payment are not configured for this store.</p>
+                            )}
 
                             {pendingOrder && (
-                                <section className="mt-5 rounded border border-amber-300 bg-amber-50 p-4" aria-live="polite">
+                                <section className={`mt-5 rounded-lg border p-4 ${
+                                    paymentStatus === 'PAID'
+                                        ? 'border-green-200 bg-green-50'
+                                        : ['PAYMENT_FAILED', 'CANCELLED'].includes(paymentStatus)
+                                            ? 'border-red-200 bg-red-50'
+                                            : 'border-amber-200 bg-amber-50'
+                                }`} aria-live="polite">
                                     <h3 className="font-semibold text-gray-900">
-                                        Payment {paymentStatus.replace('_', ' ').toLowerCase()}
+                                        {paymentStatus === 'PAID'
+                                            ? 'Payment verified'
+                                            : ['PAYMENT_FAILED', 'CANCELLED'].includes(paymentStatus)
+                                                ? 'Payment not completed'
+                                                : 'Payment awaiting verification'}
                                     </h3>
                                     <p className="mt-2 break-all text-sm text-gray-700">
                                         Order reference: <strong>{paymentIntent?.reference || pendingOrder._id}</strong>
                                     </p>
                                     <p className="mt-1 text-sm text-gray-700">
-                                        This order remains pending until payment is verified by the server. QR display and UPI app responses do not confirm payment.
+                                        {paymentStatus === 'PAID'
+                                            ? 'The server has verified this payment.'
+                                            : 'Returning from a UPI app or closing the QR does not confirm payment. This order remains pending until the server verifies it.'}
                                     </p>
                                     {paymentIntent && (
                                         <a
@@ -302,21 +363,29 @@ const Payment = () => {
                                     >
                                         Check payment status
                                     </button>
+                                    {paymentStatus !== 'PAID' && (
+                                        <p className="mt-2 text-xs text-gray-600">If you cancelled in your UPI app, you can retry once you are ready. Do not pay again while your bank app shows a completed transaction.</p>
+                                    )}
                                 </section>
                             )}
                         </section>
+                        </Stepper>
                     </>
                 )}
             </main>
 
-            {checkoutItems.length > 0 && (
+            {checkoutItems.length > 0 && shippingInfo?.name && (
                 <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white/95 px-3 pt-3 shadow-[0_-4px_14px_rgba(0,0,0,0.08)] backdrop-blur sm:px-5">
-                    <div className="mx-auto max-w-3xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+                    <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+                        <div className="min-w-0">
+                            <p className="text-[10px] uppercase tracking-wide text-gray-500">Payable amount</p>
+                            <p className="text-base font-bold text-gray-900">₹{formatAmount(totalPrice)}</p>
+                        </div>
                         <button
                             type="button"
                             onClick={continuePayment}
                             disabled={processing}
-                            className="min-h-14 w-full rounded-lg bg-primary-orange px-5 text-base font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-wait disabled:opacity-60"
+                            className="min-h-12 min-w-0 flex-1 rounded-lg bg-primary-orange px-4 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-wait disabled:opacity-60 sm:flex-none sm:px-8"
                         >
                             {processing ? 'Preparing payment...' : actionLabel}
                         </button>

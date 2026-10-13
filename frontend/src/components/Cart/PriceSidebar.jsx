@@ -1,5 +1,4 @@
-
-const PriceSidebar = ({ cartItems }) => {
+const PriceSidebar = ({ cartItems = [] }) => {
     const getValidOriginalPrice = (item) => {
         const originalPrice = Number(item.cuttedPrice);
         return Number.isFinite(originalPrice) && originalPrice > Number(item.price)
@@ -7,34 +6,42 @@ const PriceSidebar = ({ cartItems }) => {
             : Number(item.price) || 0;
     };
     const itemCount = cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-    const originalTotal = cartItems.reduce((sum, item) => sum + getValidOriginalPrice(item) * item.quantity, 0);
-    const sellingTotal = cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
-    const discount = originalTotal - sellingTotal;
+    const originalTotal = cartItems.reduce((sum, item) => sum + getValidOriginalPrice(item) * Number(item.quantity || 0), 0);
+    const sellingTotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0) * Number(item.quantity || 0), 0);
+    const discount = Math.max(0, originalTotal - sellingTotal);
 
     return (
-        <div className="flex flex-col md:sticky md:top-16 md:h-screen md:w-4/12 md:px-1">
-
-            {/* <!-- nav tiles --> */}
-            <div className="flex flex-col bg-white rounded-sm shadow">
-                <h1 className="px-6 py-3 border-b font-medium text-gray-500">PRICE DETAILS</h1>
-
-                <div className="flex flex-col gap-4 p-6 pb-3">
-                    <p className="flex justify-between">Price ({itemCount} {itemCount === 1 ? 'item' : 'items'}) <span>₹{originalTotal.toLocaleString('en-IN')}</span></p>
-                    <p className="flex justify-between">Discount <span className="text-primary-green">- ₹{discount.toLocaleString('en-IN')}</span></p>
-                    <p className="flex justify-between">Delivery Charges <span className="text-primary-green">FREE</span></p>
-
-                    <div className="border border-dashed"></div>
-                    <p className="flex justify-between text-lg font-medium">Total Amount <span>₹{sellingTotal.toLocaleString('en-IN')}</span></p>
-                    <div className="border border-dashed"></div>
-
-                    {discount > 0 && <p className="font-medium text-primary-green">You will save ₹{discount.toLocaleString('en-IN')} on this order</p>}
-
-                </div>
-
+        <aside className="h-fit w-full rounded-xl border border-gray-100 bg-white shadow-sm md:sticky md:top-20 md:w-[340px] md:flex-shrink-0">
+            <h2 className="border-b border-gray-100 px-4 py-3 text-sm font-semibold tracking-wide text-gray-500">PRICE DETAILS</h2>
+            <div className="flex flex-col gap-3 p-4 text-sm">
+                <p className="flex justify-between gap-3">
+                    <span>Price ({itemCount} {itemCount === 1 ? 'item' : 'items'})</span>
+                    <span>₹{originalTotal.toLocaleString('en-IN')}</span>
+                </p>
+                <p className="flex justify-between gap-3">
+                    <span>Discount</span>
+                    <span className="text-primary-green">− ₹{discount.toLocaleString('en-IN')}</span>
+                </p>
+                <p className="flex justify-between gap-3">
+                    <span>Delivery</span>
+                    <span className="font-medium text-primary-green">FREE</span>
+                </p>
+                <div className="border-t border-dashed border-gray-300" />
+                <p className="flex justify-between gap-3 text-base font-semibold">
+                    <span>Total payable</span>
+                    <span>₹{sellingTotal.toLocaleString('en-IN')}</span>
+                </p>
+                <div className="border-t border-dashed border-gray-300" />
+                {discount > 0 && (
+                    <p className="text-xs font-medium text-primary-green">
+                        You save ₹{discount.toLocaleString('en-IN')} on this order
+                    </p>
+                )}
+                <p className="text-[11px] leading-relaxed text-gray-500">
+                    Total uses store-supplied product prices. The checkout API does not calculate a separate tax line; delivery is free.
+                </p>
             </div>
-            {/* <!-- nav tiles --> */}
-
-        </div>
+        </aside>
     );
 };
 
