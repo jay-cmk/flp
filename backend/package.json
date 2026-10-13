@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js",
+    "seed:products": "node seed-products.js",
     "setup-admin": "node setup-admin.js",
     "reset-admin": "node reset-admin.js"
   },

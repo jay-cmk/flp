@@ -77,6 +77,8 @@ Set `REACT_APP_API_URL` in Vercel to the deployed Render backend origin, without
 
 Run `npm run seed` from the `backend` directory only for manual development/demo setup. It requires locally configured `SEED_ADMIN_PASSWORD` and `SEED_USER_PASSWORD`, deletes existing user, product, and order records before inserting sample data, and never runs automatically. Never run it against a production database.
 
+To add only the six low-cost accessory sample products without deleting or changing existing records, first ensure the target database already has an admin account, then run `npm run seed:products` from `backend`. This additive seed uses the existing `MONGO_URI`, assigns the products to an existing admin, and is repeatable: records with the same product name and category are left unchanged on subsequent runs. Product photos use external Unsplash image URLs; no Cloudinary credentials or uploads are used. Products appear in the existing listing/search APIs under the `Audio` and `Accessories` category filters. Check `MONGO_URI` carefully before running the command; the products are inserted into the database selected by that environment variable.
+
 ## Test on a Local Mobile Device
 
 The backend and frontend development servers bind to all network interfaces. Start both on the same computer, connect the phone to the same trusted Wi-Fi network, find the computer's IPv4 address with `ipconfig`, then open `http://<computer-ipv4>:3000` on the phone. Allow the development server through Windows Firewall on the private network if prompted. Frontend API requests use relative URLs and the development server proxies them to the backend, so do not set the phone's API host to `localhost`.

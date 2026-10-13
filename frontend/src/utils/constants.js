@@ -3,6 +3,8 @@ export const categories = [
     "Electronics",
     "Mobiles",
     "Laptops",
+    "Audio",
+    "Accessories",
     "Fashion",
     "Appliances",
     "Home",
