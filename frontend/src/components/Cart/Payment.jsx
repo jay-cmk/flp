@@ -460,7 +460,7 @@ const Payment = () => {
 
             {checkoutItems.length > 0 && shippingInfo?.name && (
                 <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white/95 px-3 pt-3 shadow-[0_-4px_14px_rgba(0,0,0,0.08)] backdrop-blur sm:px-5">
-                    <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+                    <div className="mx-auto flex max-w-5xl items-center justify-start gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
                         <div className="min-w-0">
                             <p className="text-[10px] uppercase tracking-wide text-gray-500">Payable amount</p>
                             <p className="text-base font-bold text-gray-900">₹{formatAmount(totalPrice)}</p>
@@ -469,7 +469,7 @@ const Payment = () => {
                             type="button"
                             onClick={continuePayment}
                             disabled={processing || paymentStatus === 'PAID'}
-                            className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-orange px-4 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-wait disabled:opacity-60 sm:flex-none sm:px-8"
+                            className="inline-flex min-h-12 min-w-0  items-center justify-center gap-2 rounded-lg bg-primary-orange px-4 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-wait disabled:opacity-60 sm:flex-none sm:px-8"
                         >
                             <AccountBalanceWalletIcon sx={{ fontSize: 18 }} />
                             {processing
